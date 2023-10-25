@@ -1,5 +1,5 @@
 // This is an NSQ client that reads the specified topic/channel
-// and performs HTTP requests (GET/POST) to the specified endpoints
+// and peenv GOOS=windows GOARCH=amd64 go buildrforms HTTP requests (GET/POST) to the specified endpoints
 
 package main
 
@@ -127,6 +127,7 @@ func (ph *PublishHandler) HandleMessage(m *nsq.Message) error {
 type PostPublisher struct{}
 
 func (p *PostPublisher) Publish(addr string, msg []byte) error {
+	log.Printf("about to publish to %s, msg: %s", addr, string(msg))
 	buf := bytes.NewBuffer(msg)
 	resp, err := HTTPPost(addr, buf)
 	if err != nil {
@@ -239,7 +240,7 @@ func main() {
 		addresses = getAddrs
 	}
 
-	cfg.UserAgent = fmt.Sprintf("nsq_to_http/%s go-nsq/%s", version.Binary, nsq.VERSION)
+	cfg.UserAgent = fmt.Sprintf("nsq_to_http/%s-custom go-nsq/%s", version.Binary, nsq.VERSION)
 	cfg.MaxInFlight = *maxInFlight
 
 	consumer, err := nsq.NewConsumer(*topic, *channel, cfg)
