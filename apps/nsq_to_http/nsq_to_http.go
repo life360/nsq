@@ -93,6 +93,7 @@ func (ph *PublishHandler) HandleMessage(m *nsq.Message) error {
 			st := time.Now()
 			err := ph.Publish(addr, m.Body)
 			if err != nil {
+				log.Printf("error publishing: %s", err)
 				return err
 			}
 			ph.perAddressStatus[addr].Status(st)
@@ -103,6 +104,7 @@ func (ph *PublishHandler) HandleMessage(m *nsq.Message) error {
 		addr := ph.addresses[idx]
 		err := ph.Publish(addr, m.Body)
 		if err != nil {
+			log.Printf("error publishing: %s", err)
 			return err
 		}
 		ph.perAddressStatus[addr].Status(startTime)
@@ -112,6 +114,7 @@ func (ph *PublishHandler) HandleMessage(m *nsq.Message) error {
 		err := ph.Publish(addr, m.Body)
 		hostPoolResponse.Mark(err)
 		if err != nil {
+			log.Printf("error publishing: %s", err)
 			return err
 		}
 		ph.perAddressStatus[addr].Status(startTime)
