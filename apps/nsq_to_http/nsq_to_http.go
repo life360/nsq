@@ -127,7 +127,6 @@ func (ph *PublishHandler) HandleMessage(m *nsq.Message) error {
 type PostPublisher struct{}
 
 func (p *PostPublisher) Publish(addr string, msg []byte) error {
-	log.Printf("about to publish message to %s", addr)
 	buf := bytes.NewBuffer(msg)
 	resp, err := HTTPPost(addr, buf)
 	if err != nil {
