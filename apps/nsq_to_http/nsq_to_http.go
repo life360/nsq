@@ -35,6 +35,7 @@ const (
 
 var (
 	showVersion = flag.Bool("version", false, "print version string")
+	dryRun      = flag.Bool("dry-run", false, "when true, POST requests are not made")
 
 	topic       = flag.String("topic", "", "nsq topic")
 	channel     = flag.String("channel", "nsq_to_http", "nsq channel")
@@ -128,15 +129,21 @@ type PostPublisher struct{}
 
 func (p *PostPublisher) Publish(addr string, msg []byte) error {
 	buf := bytes.NewBuffer(msg)
-	resp, err := HTTPPost(addr, buf)
-	if err != nil {
-		return err
-	}
-	io.Copy(io.Discard, resp.Body)
-	resp.Body.Close()
 
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("got status code %d", resp.StatusCode)
+	if !*dryRun {
+		log.Printf("about to publish message to %s", addr)
+		resp, err := HTTPPost(addr, buf)
+		if err != nil {
+			return err
+		}
+		io.Copy(io.Discard, resp.Body)
+		resp.Body.Close()
+
+		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+			return fmt.Errorf("got status code %d", resp.StatusCode)
+		}
+	} else {
+		log.Printf("dry-run: consumed message successfully. Discarding")
 	}
 	return nil
 }
