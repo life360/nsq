@@ -1,5 +1,5 @@
 // This is an NSQ client that reads the specified topic/channel
-// and performs HTTP requests (GET/POST) to the specified endpoints
+// and peenv GOOS=windows GOARCH=amd64 go buildrforms HTTP requests (GET/POST) to the specified endpoints
 
 package main
 
@@ -35,6 +35,7 @@ const (
 
 var (
 	showVersion = flag.Bool("version", false, "print version string")
+	dryRun      = flag.Bool("dry-run", false, "when true, POST requests are not made")
 
 	topic       = flag.String("topic", "", "nsq topic")
 	channel     = flag.String("channel", "nsq_to_http", "nsq channel")
@@ -93,6 +94,7 @@ func (ph *PublishHandler) HandleMessage(m *nsq.Message) error {
 			st := time.Now()
 			err := ph.Publish(addr, m.Body)
 			if err != nil {
+				log.Printf("error publishing: %s", err)
 				return err
 			}
 			ph.perAddressStatus[addr].Status(st)
@@ -103,6 +105,7 @@ func (ph *PublishHandler) HandleMessage(m *nsq.Message) error {
 		addr := ph.addresses[idx]
 		err := ph.Publish(addr, m.Body)
 		if err != nil {
+			log.Printf("error publishing: %s", err)
 			return err
 		}
 		ph.perAddressStatus[addr].Status(startTime)
@@ -112,6 +115,7 @@ func (ph *PublishHandler) HandleMessage(m *nsq.Message) error {
 		err := ph.Publish(addr, m.Body)
 		hostPoolResponse.Mark(err)
 		if err != nil {
+			log.Printf("error publishing: %s", err)
 			return err
 		}
 		ph.perAddressStatus[addr].Status(startTime)
@@ -125,15 +129,21 @@ type PostPublisher struct{}
 
 func (p *PostPublisher) Publish(addr string, msg []byte) error {
 	buf := bytes.NewBuffer(msg)
-	resp, err := HTTPPost(addr, buf)
-	if err != nil {
-		return err
-	}
-	io.Copy(io.Discard, resp.Body)
-	resp.Body.Close()
 
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("got status code %d", resp.StatusCode)
+	if !*dryRun {
+		log.Printf("about to publish message to %s", addr)
+		resp, err := HTTPPost(addr, buf)
+		if err != nil {
+			return err
+		}
+		io.Copy(io.Discard, resp.Body)
+		resp.Body.Close()
+
+		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+			return fmt.Errorf("got status code %d", resp.StatusCode)
+		}
+	} else {
+		log.Printf("dry-run: consumed message successfully. Discarding")
 	}
 	return nil
 }
@@ -236,7 +246,7 @@ func main() {
 		addresses = getAddrs
 	}
 
-	cfg.UserAgent = fmt.Sprintf("nsq_to_http/%s go-nsq/%s", version.Binary, nsq.VERSION)
+	cfg.UserAgent = fmt.Sprintf("nsq_to_http/%s-custom go-nsq/%s", version.Binary, nsq.VERSION)
 	cfg.MaxInFlight = *maxInFlight
 
 	consumer, err := nsq.NewConsumer(*topic, *channel, cfg)
