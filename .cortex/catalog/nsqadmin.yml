@@ -1,0 +1,20 @@
+openapi: 3.0.1
+info:
+  title: nsqadmin
+  x-cortex-git:
+    github:
+      repository: life360/nsq
+  x-cortex-tag: nsqadmin
+  x-cortex-groups:
+  - compass_type:service
+  x-cortex-owners:
+  - name: ""
+    type: group
+    provider: CORTEX
+  x-cortex-custom-metadata:
+    compass_metadata:
+      component_id: ari:cloud:compass:b48cf56c-3102-4142-8d15-87111780edd0:component/05c1ced0-1b30-4a92-a3d9-324d73ddf9f8/1654a140-93f6-4fa7-ae44-94a2f86eaee9
+      component_labels:
+      - name: csv-import
+      component_typeId: SERVICE
+      component_ownerId: ari:cloud:teams::team/4966b2ca-efa3-4bfc-9760-38a50f074a24-61
