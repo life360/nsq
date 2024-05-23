@@ -22,7 +22,7 @@
     "vinyl-source-stream": "^2.0.0"
   },
   "dependencies": {
-    "backbone": "^1.4.0",
+    "backbone": "^1.6.0",
     "bootbox": "^5.5.2",
     "bootstrap": "^3.4.1",
     "jquery": "^3.6.0",
