@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "backbone": "^1.4.0",
-    "bootbox": "^5.5.2",
+    "bootbox": "^5.5.3",
     "bootstrap": "^3.4.1",
     "jquery": "^3.6.0",
     "moment": "^2.29.1",
